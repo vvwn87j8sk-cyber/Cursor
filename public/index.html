@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sweet Auction</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Sweet Auction</h1>
+      <p class="tagline">Bid on handcrafted sweets in real time.</p>
+    </header>
+
+    <main class="layout">
+      <section id="auction-section" class="card">
+        <div id="auction-empty" class="empty-state" hidden>
+          <p>No active auction right now. Check back soon!</p>
+        </div>
+
+        <div id="auction-active" hidden>
+          <div class="auction-header">
+            <div>
+              <h2 id="auction-title"></h2>
+              <p id="auction-status" class="status-pill"></p>
+            </div>
+            <div class="price-display">
+              <span class="label">Current Bid</span>
+              <span id="current-price" class="price" data-value="0">$0.00</span>
+              <span id="highest-bidder" class="subtle"></span>
+            </div>
+          </div>
+
+          <div class="auction-content">
+            <div class="auction-media">
+              <img id="auction-photo" alt="Auction item" />
+            </div>
+            <div class="auction-details">
+              <p id="auction-description"></p>
+              <p id="auction-endtime" class="subtle"></p>
+            </div>
+          </div>
+
+          <div id="bid-controls" class="bid-controls">
+            <div id="name-capture" class="name-capture">
+              <label for="bidder-name-input">Display name</label>
+              <div class="name-input-row">
+                <input id="bidder-name-input" name="bidderName" maxlength="40" />
+                <button id="save-name-btn" type="button" class="primary">Save</button>
+              </div>
+              <p class="hint">Saved to this browser only.</p>
+            </div>
+
+            <div id="bidder-name-display" class="name-display" hidden>
+              <span id="bidder-name-text"></span>
+              <button id="change-name-btn" type="button" class="link-button">change</button>
+            </div>
+
+            <div class="quick-bids">
+              <button type="button" class="primary quick-bid" data-add="25">+ $0.25</button>
+              <button type="button" class="primary quick-bid" data-add="100">+ $1.00</button>
+            </div>
+
+            <form id="custom-bid-form" class="custom-bid" autocomplete="off">
+              <label for="custom-bid-input">Custom bid</label>
+              <div class="custom-bid-row">
+                <input
+                  id="custom-bid-input"
+                  type="number"
+                  min="0"
+                  step="0.25"
+                  placeholder="0.00"
+                  inputmode="decimal"
+                  autocomplete="off"
+                />
+                <button id="place-bid-btn" type="submit" class="primary">Place Bid</button>
+              </div>
+            </form>
+            <p id="bid-feedback" role="alert" class="feedback" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Recent Bids</h2>
+          <span id="bid-count" class="subtle"></span>
+        </div>
+        <ul id="bid-history" class="bid-history"></ul>
+      </section>
+
+      <section id="admin-panel" class="card">
+        <div class="card-header">
+          <h2>Seller Controls</h2>
+        </div>
+
+        <form id="admin-unlock-form" class="admin-unlock" autocomplete="off">
+          <label for="admin-pass-input">Admin passcode</label>
+          <div class="admin-pass-row">
+            <input id="admin-pass-input" type="password" autocomplete="current-password" />
+            <button type="submit" class="primary">Unlock</button>
+          </div>
+          <p id="admin-feedback" class="feedback" aria-live="polite"></p>
+        </form>
+
+        <div id="admin-controls" hidden>
+          <form id="auction-form" class="admin-form" autocomplete="off">
+            <div class="form-row">
+              <label for="form-title">Title</label>
+              <input id="form-title" name="title" required maxlength="120" />
+            </div>
+            <div class="form-row">
+              <label for="form-description">Description</label>
+              <textarea id="form-description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-row">
+              <label for="form-photo">Photo URL</label>
+              <input id="form-photo" name="photoUrl" type="url" placeholder="https://example.com/image.jpg" />
+            </div>
+            <div class="form-row">
+              <label for="form-start-price">Start price ($)</label>
+              <input id="form-start-price" name="startPrice" type="number" min="0" step="0.25" required />
+            </div>
+            <div class="form-row">
+              <label for="form-end-time">End time (optional)</label>
+              <input id="form-end-time" name="endTime" type="datetime-local" />
+            </div>
+            <div class="form-actions">
+              <button id="create-update-btn" type="submit" class="primary"></button>
+              <button id="reset-form-btn" type="button" class="secondary">Reset</button>
+            </div>
+          </form>
+
+          <div class="admin-actions">
+            <button id="end-auction-btn" type="button" class="danger">End Auction Now</button>
+            <button id="refresh-bids-btn" type="button" class="secondary">Refresh Bid Log</button>
+          </div>
+
+          <div class="admin-bid-log">
+            <h3>Full Bid Log</h3>
+            <ul id="admin-bid-log" class="bid-history"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Hosted locally • Keep this window open to receive live updates.</p>
+    </footer>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

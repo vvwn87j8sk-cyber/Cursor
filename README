@@ -1,3 +1,106 @@
-READ ME
-REAM ME
-REMY!
+Sweet Auction - Minimal Realtime Auction App
+============================================
+
+Sweet Auction is a small, production-ready Node.js app that lets a single seller run one live auction for sweets while buyers place bids with quarter-dollar increments. It uses SQLite for durable storage and Server-Sent Events (SSE) for realtime updates without complex infrastructure.
+
+Features
+--------
+
+- Single active auction with title, description, photo, starting price, and optional end time.
+- Realtime bid updates over SSE; buyers see current prices and history without refreshing.
+- Bid increments fixed at $0.25; server enforces ordering and prevents races with SQLite transactions.
+- Buyers save a display name locally (no accounts) and can place quick or custom bids.
+- Seller unlocks admin tools with an env-configured passcode to create/update/end auctions and inspect bid logs.
+- Clean, responsive UI built with vanilla HTML/CSS/JS.
+
+Stack
+-----
+
+- **Runtime:** Node.js 20+
+- **Server:** Express + better-sqlite3 (synchronous)
+- **Realtime:** Server-Sent Events
+- **Database:** SQLite (prices stored as integer cents)
+- **Frontend:** Static HTML/CSS/JS (no frameworks)
+
+Getting Started
+---------------
+
+```bash
+git clone <repo>
+cd workspace
+npm install
+echo "ADMIN_PASS=changeme" > .env
+npm run start
+# open http://localhost:3000
+```
+
+During development you can use hot reload:
+
+```bash
+npm run dev
+```
+
+Configuration
+-------------
+
+Environment variables (via `.env`):
+
+- `ADMIN_PASS` – Required passcode for seller routes. Keep this secret in production.
+- `PORT` – Optional. Defaults to `3000`.
+
+Project Structure
+-----------------
+
+```
+server/
+  db.js          # SQLite setup & helper queries
+  index.js       # Express app, routes, SSE
+  sse.js         # SSE client registry and broadcaster
+public/
+  index.html     # Single-page auction UI
+  styles.css     # Minimal responsive styling
+  app.js         # Frontend logic (buyers + admin)
+data/            # SQLite database file (created automatically, gitignored)
+```
+
+Key Workflows
+-------------
+
+- **Creating/Editing Auctions:** Unlock seller controls with the admin pass, fill the form, and submit. Starting prices and all bids are stored in cents and rounded to $0.25 increments.
+- **Placing Bids:** Buyers enter a display name once (stored in `localStorage`) and can use quick buttons or custom amounts. The server validates increments, ensures bids exceed the current price, and rejects late bids.
+- **Realtime Stream:** `/api/stream` uses SSE, broadcasting `state`, `bid`, and `end` events to all connected clients with a heartbeat every 25s.
+- **Ending Auctions:** Sellers can end the auction manually, instantly locking out new bids and notifying clients.
+
+API Overview
+------------
+
+- `GET /api/auction` – Current auction snapshot with highest bid and bidder.
+- `GET /api/bids?limit=20` – Recent bids for the latest auction.
+- `POST /api/bid` – Place a bid (`{ bidderName, amountCents }`).
+- `GET /api/stream` – SSE feed (`state`, `bid`, `end` events).
+- `POST /api/admin/auction` *(admin)* – Create a new active auction.
+- `PATCH /api/admin/auction` *(admin)* – Update the current auction.
+- `POST /api/admin/end` *(admin)* – End the current auction.
+- `GET /api/admin/bids` *(admin)* – Full bid log for the latest auction.
+
+Admin requests must include the header `x-admin-pass: <ADMIN_PASS>` (or a `Bearer` token) and will fail with `401` if the passcode is invalid.
+
+Operational Notes
+-----------------
+
+- The database file lives in `data/auction.db` and is created automatically; ensure the process has write permissions in production.
+- The server uses SQLite transactions to guarantee bid ordering when multiple bids arrive nearly simultaneously.
+- SSE clients receive a heartbeat comment every 25 seconds to keep proxies from timing out the connection.
+- The frontend rounds all custom bid inputs up to the next $0.25 step, but the server remains the source of truth.
+
+Troubleshooting
+---------------
+
+- **Admin unlock fails:** Confirm `ADMIN_PASS` is set and matches the value in `.env`, then restart the server.
+- **No realtime updates:** Ensure the browser keeps the tab open, check console/network logs, and verify reverse proxies allow streaming responses.
+- **SQLite file locked:** Stop other processes using the DB. For containerized deployments, mount `data/` on persistent storage.
+
+License
+-------
+
+MIT (update as needed). Pull requests and suggestions welcome. Enjoy running sweet auctions!
